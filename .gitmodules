@@ -1,0 +1,3 @@
+[submodule "libs/WjCryptLib"]
+	path = libs/WjCryptLib
+	url = https://github.com/WaterJuice/WjCryptLib
