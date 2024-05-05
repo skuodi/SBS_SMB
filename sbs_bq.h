@@ -92,20 +92,19 @@
 #include "sbs_smb.h"
 #include "sbs_bq.h"
 
-int SBSBqManufacturerBlockAccess(smbus_handle_t handle, uint8_t devAddr, uint16_t subcommand,
-                                        uint8_t *dataRecv, uint8_t *dataLength, int delayMs);
+/// @brief Perform a SHA1 authentication handshake using a 128-bit key
+/// @param battery 
+/// @param accessCmd 
+/// @param key 
+/// @return 
+int SBSBqAccessSha1Hmac(sbs_smb_battery_t *battery, uint8_t accessCmd, uint8_t *key);
 
-int SBSBqManufacturerAccess(smbus_handle_t handle, uint8_t devAddr, uint16_t subcommand,
-                                   uint8_t *dataRecv, uint8_t *dataLength, int delayMs);
+int SBSBqBlockAccessSha1Hmac(sbs_smb_battery_t *battery, uint8_t accessCmd, uint8_t *key);
 
-int SBSBqAccessSha1Hmac(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCmd, uint8_t *key);
+int SBSBqAccess2WordKey(sbs_smb_battery_t *battery, uint8_t accessCmd, uint16_t *key);
 
-int SBSBqBlockAccessSha1Hmac(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCmd, uint8_t *key);
+int SBSBqBlockAccess2WordKey(sbs_smb_battery_t *battery, uint8_t accessCmd, uint16_t *key);
 
-int SBSBqAccess2WordKey(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCmd, uint16_t *key);
-
-int SBSBqBlockAccess2WordKey(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCmd, uint16_t *key);
-
-int SBSBqSeal(smbus_handle_t handle, uint8_t devAddr);
+int SBSBqSeal(sbs_smb_battery_t *battery);
 
 #endif

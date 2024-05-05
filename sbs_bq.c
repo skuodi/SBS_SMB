@@ -6,38 +6,29 @@
 #include "platform/smbus_platform.h"
 #include "sbs_bq.h"
 
-inline int SBSBqManufacturerBlockAccess(smbus_handle_t handle, uint8_t devAddr, uint16_t subcommand,
-                                        uint8_t *dataRecv, uint8_t *dataLength, int delayMs)
+int SBSBqAccessSha1Hmac(sbs_smb_battery_t *battery, uint8_t accessCmd, uint8_t *key)
 {
-  return SMBusWriteWordBlockReadBlock(handle, devAddr, SBS_BQ_COMMAND_MANUFACTURER_BLOCK_ACCESS, subcommand,
-                                      SBS_BQ_COMMAND_MANUFACTURER_BLOCK_ACCESS, dataRecv, dataLength, delayMs);
-}
-
-inline int SBSBqManufacturerAccess(smbus_handle_t handle, uint8_t devAddr, uint16_t subcommand,
-                                   uint8_t *dataRecv, uint8_t *dataLength, int delayMs)
-{
-  return SMBusWriteWordReadBlock(handle, devAddr, SBS_COMMAND_MANUFACTURER_ACCESS, subcommand, true,
-                                 SBS_COMMAND_MANUFACTURER_DATA, dataRecv, dataLength, delayMs);
-}
-
-int SBSBqAccessSha1Hmac(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCmd, uint8_t *key)
-{
-  if (!handle || !key)
+  if (!battery || !battery->bus || !key)
     return SMBUS_ERR_INVALID_ARG;
 
   uint8_t msgLen;
-  uint8_t dataBuff[256];
+  uint8_t dataBuff[256 + 1];
   uint8_t flipBuff[20];
 
   SHA1_HASH hash;
   memset(dataBuff, 0, sizeof(dataBuff));
 
   // Send the unseal command and receive a 20-byte challenge message
-  int ret = SBSBqManufacturerAccess(handle, devAddr, accessCmd, dataBuff + 16, &msgLen, 50);
+  int ret = SBSRunCommand(battery, SBS_SMB_CMD_CODE_MANUFACTURER_ACCESS, &accessCmd,
+                          sizeof(accessCmd), dataBuff + 16, sizeof(dataBuff) - 16);
   if (ret != SMBUS_ERR_OK)
     return ret;
+  msgLen = *(dataBuff + 16);  // The first value returned is the size of the data received
   if (msgLen != 20)
     return SMBUS_ERR_UNEXPECTED_DATA_RECEIVED;
+  
+  for(uint8_t i = 0; i < msgLen; i++)
+    (dataBuff + 16)[i] = (dataBuff + 16)[i + 1];
 
   // Data is transferred LSByte first but hash is calculated MSByte first so reverse the order of received bytes
   for (int i = 20; i > 0; i--)
@@ -87,16 +78,23 @@ int SBSBqAccessSha1Hmac(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCm
   for (int i = 20; i > 0; i--)
     flipBuff[sizeof(flipBuff) - i] = hash.bytes[i - 1];
 
-  ret = SMBusBlockWrite(handle, devAddr, SBS_COMMAND_OPTIONAL_MFG_FUNCTION5, hash.bytes, 20);
+  ret = SMBusBlockWrite(battery->bus, battery->busAddress, SBS_COMMAND_OPTIONAL_MFG_FUNCTION5, hash.bytes, 20);
   if (ret != SMBUS_ERR_OK)
     return ret;
 
   // Takes at least 250ms for the setting to take effect
   SMBusPlatformDelayMs(500);
 
-  ret = SBSBqManufacturerAccess(handle, devAddr, SBS_BQ_COMMAND_OPERATION_STATUS, dataBuff, &msgLen, 50);
+  uint16_t temp = SBS_BQ_COMMAND_OPERATION_STATUS;
+  ret = SBSRunCommand(battery, SBS_SMB_CMD_CODE_MANUFACTURER_ACCESS,
+                      &temp, sizeof(temp), dataBuff, sizeof(dataBuff));
+
+  msgLen = *dataBuff;
   if (ret != SMBUS_ERR_OK || msgLen != 3)
-    return ret;
+    return SMBUS_ERR_UNEXPECTED_DATA_RECEIVED;
+
+  for(uint8_t i = 0; i < msgLen; i++)
+    dataBuff[i] = dataBuff[i + 1];
 
   if (accessCmd == SBS_BQ_COMMAND_UNSEAL_DEVICE)
     return ((dataBuff[1] & 1) && !(dataBuff[0] & 0x08)) ? SMBUS_ERR_OK : SMBUS_ERR_FAIL;
@@ -106,9 +104,9 @@ int SBSBqAccessSha1Hmac(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCm
   return SMBUS_ERR_FAIL;
 }
 
-int SBSBqBlockAccessSha1Hmac(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCmd, uint8_t *key)
+int SBSBqBlockAccessSha1Hmac(sbs_smb_battery_t *battery, uint8_t accessCmd, uint8_t *key)
 {
-  if (!handle || !key)
+  if (!battery->bus || !key)
     return SMBUS_ERR_INVALID_ARG;
 
   uint8_t msgLen;
@@ -119,11 +117,16 @@ int SBSBqBlockAccessSha1Hmac(smbus_handle_t handle, uint8_t devAddr, uint8_t acc
   memset(dataBuff, 0, sizeof(dataBuff));
 
   // Send the unseal command and receive a 20-byte challenge message
-  int ret = SBSBqManufacturerBlockAccess(handle, devAddr, accessCmd, dataBuff + 16, &msgLen, 50);
+  int ret = SBSRunCommand(battery, SBS_SMB_CMD_CODE_MANUFACTURER_BLOCK_ACCESS, &accessCmd,
+                          sizeof(accessCmd), dataBuff + 16, sizeof(dataBuff) - 16);
   if (ret != SMBUS_ERR_OK)
     return ret;
+  msgLen = *(dataBuff + 16);  // The first value returned is the size of the data received
   if (msgLen != 20)
     return SMBUS_ERR_UNEXPECTED_DATA_RECEIVED;
+  
+  for(uint8_t i = 0; i < msgLen; i++)
+    (dataBuff + 16)[i] = (dataBuff + 16)[i + 1];
 
   // Data is transferred LSByte first but hash is calculated MSByte first so reverse the order of received bytes
   for (int i = 20; i > 0; i--)
@@ -173,16 +176,23 @@ int SBSBqBlockAccessSha1Hmac(smbus_handle_t handle, uint8_t devAddr, uint8_t acc
   for (int i = 20; i > 0; i--)
     flipBuff[sizeof(flipBuff) - i] = hash.bytes[i - 1];
 
-  ret = SMBusBlockWrite(handle, devAddr, SBS_COMMAND_OPTIONAL_MFG_FUNCTION5, hash.bytes, 20);
+  ret = SMBusBlockWrite(battery->bus, battery->busAddress, SBS_COMMAND_OPTIONAL_MFG_FUNCTION5, hash.bytes, 20);
   if (ret != SMBUS_ERR_OK)
     return ret;
 
   // Takes at least 250ms for the setting to take effect
   SMBusPlatformDelayMs(500);
 
-  ret = SBSBqManufacturerBlockAccess(handle, devAddr, SBS_BQ_COMMAND_OPERATION_STATUS, dataBuff, &msgLen, 50);
+  uint16_t temp = SBS_BQ_COMMAND_OPERATION_STATUS;
+  ret = SBSRunCommand(battery, SBS_SMB_CMD_CODE_MANUFACTURER_BLOCK_ACCESS,
+                      &temp, sizeof(temp), dataBuff, sizeof(dataBuff));
+
+  msgLen = *dataBuff;
   if (ret != SMBUS_ERR_OK || msgLen != 3)
-    return ret;
+    return SMBUS_ERR_UNEXPECTED_DATA_RECEIVED;
+
+  for(uint8_t i = 0; i < msgLen; i++)
+    dataBuff[i] = dataBuff[i + 1];
 
   if (accessCmd == SBS_BQ_COMMAND_UNSEAL_DEVICE)
     return ((dataBuff[1] & 1) && !(dataBuff[0] & 0x08)) ? SMBUS_ERR_OK : SMBUS_ERR_FAIL;
@@ -192,30 +202,40 @@ int SBSBqBlockAccessSha1Hmac(smbus_handle_t handle, uint8_t devAddr, uint8_t acc
   return SMBUS_ERR_FAIL;
 }
 
-int SBSBqAccess2WordKey(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCmd, uint16_t *key)
+int SBSBqAccess2WordKey(sbs_smb_battery_t *battery, uint8_t accessCmd, uint16_t *key)
 {
-  if (!handle || !key)
+  if (!battery->bus || !key)
     return SMBUS_ERR_INVALID_ARG;
 
   uint8_t recvCount;
   uint8_t dataBuff[256];
 
-  int ret = SMBusWriteWord(handle, devAddr, SBS_COMMAND_MANUFACTURER_ACCESS, key[0]);
+  int ret = SMBusWriteWord(battery->bus, battery->busAddress, SBS_COMMAND_MANUFACTURER_ACCESS, key[0]);
   if (ret != SMBUS_ERR_OK)
     return ret;
 
   SMBusPlatformDelayMs(50);
 
-  ret = SMBusWriteWord(handle, devAddr, SBS_COMMAND_MANUFACTURER_ACCESS, key[1]);
+  ret = SMBusWriteWord(battery->bus, battery->busAddress, SBS_COMMAND_MANUFACTURER_ACCESS, key[1]);
   if (ret != SMBUS_ERR_OK)
     return ret;
 
   // Takes at least 250ms for the setting to take effect
   SMBusPlatformDelayMs(500);
 
-  ret = SBSBqManufacturerAccess(handle, devAddr, SBS_BQ_COMMAND_OPERATION_STATUS, dataBuff, &recvCount, 50);
-  if (ret != SMBUS_ERR_OK || recvCount != 3)
-    return ret;
+  uint16_t temp = SBS_BQ_COMMAND_OPERATION_STATUS;
+  ret = SBSRunCommand(battery, SBS_SMB_CMD_CODE_MANUFACTURER_ACCESS,
+                      &temp, sizeof(temp), dataBuff, sizeof(dataBuff));
+
+  recvCount = *dataBuff;
+  if (ret != SMBUS_ERR_OK)
+  {
+    SBSLogError(SMBUS_ERR_UNEXPECTED_DATA_RECEIVED, &recvCount, sizeof(recvCount));
+    return SMBUS_ERR_UNEXPECTED_DATA_RECEIVED;
+  }
+
+  for(uint8_t i = 0; i < recvCount; i++)
+    dataBuff[i] = dataBuff[i + 1];
 
   if (accessCmd == SBS_BQ_COMMAND_UNSEAL_DEVICE)
     return ((dataBuff[1] & 1) && !(dataBuff[0] & 0x08)) ? SMBUS_ERR_OK : SMBUS_ERR_FAIL;
@@ -225,30 +245,37 @@ int SBSBqAccess2WordKey(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCm
   return SMBUS_ERR_FAIL;
 }
 
-int SBSBqBlockAccess2WordKey(smbus_handle_t handle, uint8_t devAddr, uint8_t accessCmd, uint16_t *key)
+int SBSBqBlockAccess2WordKey(sbs_smb_battery_t *battery, uint8_t accessCmd, uint16_t *key)
 {
-  if (!handle || !key)
+  if (!battery->bus || !key)
     return SMBUS_ERR_INVALID_ARG;
 
   uint8_t recvCount;
   uint8_t dataBuff[256];
 
-  int ret = SMBusWriteWord(handle, devAddr, SBS_COMMAND_MANUFACTURER_ACCESS, key[0]);
+  int ret = SMBusWriteWord(battery->bus, battery->busAddress, SBS_COMMAND_MANUFACTURER_ACCESS, key[0]);
   if (ret != SMBUS_ERR_OK)
     return ret;
 
   SMBusPlatformDelayMs(50);
 
-  ret = SMBusWriteWord(handle, devAddr, SBS_COMMAND_MANUFACTURER_ACCESS, key[1]);
+  ret = SMBusWriteWord(battery->bus, battery->busAddress, SBS_COMMAND_MANUFACTURER_ACCESS, key[1]);
   if (ret != SMBUS_ERR_OK)
     return ret;
 
   // Takes at least 250ms for the setting to take effect
   SMBusPlatformDelayMs(500);
 
-  ret = SBSBqManufacturerBlockAccess(handle, devAddr, SBS_BQ_COMMAND_OPERATION_STATUS, dataBuff, &recvCount, 50);
-  if (ret != SMBUS_ERR_OK || recvCount != 3)
-    return ret;
+  uint16_t temp = SBS_BQ_COMMAND_OPERATION_STATUS;
+  ret = SBSRunCommand(battery, SBS_SMB_CMD_CODE_MANUFACTURER_ACCESS,
+                      &temp, sizeof(temp), dataBuff, sizeof(dataBuff));
+
+  recvCount = *dataBuff;
+  if (ret != SMBUS_ERR_OK)
+    return SMBUS_ERR_UNEXPECTED_DATA_RECEIVED;
+
+  for(uint8_t i = 0; i < recvCount; i++)
+    dataBuff[i] = dataBuff[i + 1];
 
   if (accessCmd == SBS_BQ_COMMAND_UNSEAL_DEVICE)
     return ((dataBuff[1] & 1) && !(dataBuff[0] & 0x08)) ? SMBUS_ERR_OK : SMBUS_ERR_FAIL;
@@ -258,21 +285,28 @@ int SBSBqBlockAccess2WordKey(smbus_handle_t handle, uint8_t devAddr, uint8_t acc
   return SMBUS_ERR_FAIL;
 }
 
-int SBSBqSeal(smbus_handle_t handle, uint8_t devAddr)
+int SBSBqSeal(sbs_smb_battery_t *battery)
 {
   uint8_t recvCount;
   uint8_t dataBuff[256];
 
-  int ret = SMBusWriteWord(handle, devAddr, SBS_COMMAND_MANUFACTURER_ACCESS, SBS_BQ_COMMAND_SEAL_DEVICE);
+  int ret = SMBusWriteWord(battery->bus, battery->busAddress, SBS_COMMAND_MANUFACTURER_ACCESS, SBS_BQ_COMMAND_SEAL_DEVICE);
   if (ret != SMBUS_ERR_OK)
     return ret;
 
   // Takes at least 250ms for the setting to take effect
   SMBusPlatformDelayMs(500);
 
-  ret = SBSBqManufacturerAccess(handle, devAddr, SBS_BQ_COMMAND_OPERATION_STATUS, dataBuff, &recvCount, 50);
-  if (ret != SMBUS_ERR_OK || recvCount != 3)
-    return ret;
+  uint16_t temp = SBS_BQ_COMMAND_OPERATION_STATUS;
+  ret = SBSRunCommand(battery, SBS_SMB_CMD_CODE_MANUFACTURER_ACCESS,
+                      &temp, sizeof(temp), dataBuff, sizeof(dataBuff));
+
+  recvCount = *dataBuff;
+  if (ret != SMBUS_ERR_OK)
+    return SMBUS_ERR_UNEXPECTED_DATA_RECEIVED;
+
+  for(uint8_t i = 0; i < recvCount; i++)
+    dataBuff[i] = dataBuff[i + 1];
 
   return ((dataBuff[1] & 1) && (dataBuff[0] & 0x08)) ? SMBUS_ERR_OK : SMBUS_ERR_FAIL;
 }
