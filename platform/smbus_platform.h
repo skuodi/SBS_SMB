@@ -12,11 +12,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-//millisecond delay
-#ifdef __AVR_ARCH__
-#define SMBUS_PLATFORM_MS_DELAY(x)    _delay_ms(x) 
-#endif
-
 typedef enum
 {
     SMBUS_ERR_OK                                 =   0,
@@ -66,6 +61,9 @@ smbus_handle_t SMBusInit(void* i2cPort, int8_t myAddress, uint32_t i2cSpeed, int
  **/
 smbus_err_t SMBusDeinit(smbus_handle_t handle);
 
+/**
+ * @brief Returns information about the configuration of the specified bus
+ */
 smbus_err_t SMBusGetInfo(smbus_handle_t handle, smbus_info_t *info);
 
 /**
@@ -318,6 +316,9 @@ smbus_err_t SMBusWriteWordWriteBlock(smbus_handle_t handle, uint8_t devAddr, uin
 smbus_err_t SMBusWriteWordBlockReadBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word,
                                             uint8_t responseCommand, uint8_t *dataRecv, uint8_t *dataLength, int delayMs);
 
+/**
+ * @brief platform-specific implementation of a millisecond delay
+ **/
 void SMBusPlatformDelayMs(uint32_t delayMs);
 
 #endif
