@@ -151,7 +151,7 @@ smbus_handle_t SMBusInit(void* i2cPort, int8_t myAddress, uint32_t i2cSpeed, int
     return busHandle;
 }
 
-smbus_status_t SMBusDeinit(smbus_handle_t handle)
+smbus_err_t SMBusDeinit(smbus_handle_t handle)
 {
     if(!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -161,7 +161,7 @@ smbus_status_t SMBusDeinit(smbus_handle_t handle)
     
 }
 
-smbus_status_t SMBusGetInfo(smbus_handle_t handle, smbus_info_t *info)
+smbus_err_t SMBusGetInfo(smbus_handle_t handle, smbus_info_t *info)
 {
     if(!handle || !info)
         return SMBUS_ERR_INVALID_ARG;
@@ -183,7 +183,7 @@ smbus_status_t SMBusGetInfo(smbus_handle_t handle, smbus_info_t *info)
  *          Thus this command is always sent with R/W = 0 on AVR
  * 
  **/
-smbus_status_t SMBusQuickCommand(smbus_handle_t handle, uint8_t devAddr, bool readWriteBit)
+smbus_err_t SMBusQuickCommand(smbus_handle_t handle, uint8_t devAddr, bool readWriteBit)
 {
     TWI_START();
     TWI_SEND_ADDR_W_ACK(devAddr);
@@ -192,7 +192,7 @@ smbus_status_t SMBusQuickCommand(smbus_handle_t handle, uint8_t devAddr, bool re
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusSendByte(smbus_handle_t handle, uint8_t devAddr, uint8_t data)
+smbus_err_t SMBusSendByte(smbus_handle_t handle, uint8_t devAddr, uint8_t data)
 {
     TWI_START();
     TWI_SEND_ADDR_W_ACK(devAddr);
@@ -202,7 +202,7 @@ smbus_status_t SMBusSendByte(smbus_handle_t handle, uint8_t devAddr, uint8_t dat
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusReceiveByte(smbus_handle_t handle, uint8_t devAddr, uint8_t* data)
+smbus_err_t SMBusReceiveByte(smbus_handle_t handle, uint8_t devAddr, uint8_t* data)
 {
     if(!handle || !data)
         return SMBUS_ERR_INVALID_ARG;
@@ -215,7 +215,7 @@ smbus_status_t SMBusReceiveByte(smbus_handle_t handle, uint8_t devAddr, uint8_t*
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusWriteByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t data)
+smbus_err_t SMBusWriteByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t data)
 {
     TWI_START();
     TWI_SEND_ADDR_W_ACK(devAddr);
@@ -226,7 +226,7 @@ smbus_status_t SMBusWriteByte(smbus_handle_t handle, uint8_t devAddr, uint8_t co
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusWriteWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t data)
+smbus_err_t SMBusWriteWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t data)
 {
     TWI_START();
     TWI_SEND_ADDR_W_ACK(devAddr);
@@ -239,7 +239,7 @@ smbus_status_t SMBusWriteWord(smbus_handle_t handle, uint8_t devAddr, uint8_t co
 
 }
 
-smbus_status_t SMBusReadByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* data)
+smbus_err_t SMBusReadByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* data)
 {
     if(!handle || !data)
         return SMBUS_ERR_INVALID_ARG;
@@ -255,7 +255,7 @@ smbus_status_t SMBusReadByte(smbus_handle_t handle, uint8_t devAddr, uint8_t com
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusReadWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t* data)
+smbus_err_t SMBusReadWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t* data)
 { 
     if(!handle || !data)
         return SMBUS_ERR_INVALID_ARG;
@@ -275,7 +275,7 @@ smbus_status_t SMBusReadWord(smbus_handle_t handle, uint8_t devAddr, uint8_t com
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t dataSent, uint16_t* dataRecv)
+smbus_err_t SMBusProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t dataSent, uint16_t* dataRecv)
 {
     if(!handle || !dataRecv)
         return SMBUS_ERR_INVALID_ARG;
@@ -298,7 +298,7 @@ smbus_status_t SMBusProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t 
 
 }
 
-smbus_status_t SMBusBlockWrite(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataSent, uint8_t dataLength)
+smbus_err_t SMBusBlockWrite(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataSent, uint8_t dataLength)
 {
     if(!handle || !dataSent)
         return SMBUS_ERR_INVALID_ARG;
@@ -316,7 +316,7 @@ smbus_status_t SMBusBlockWrite(smbus_handle_t handle, uint8_t devAddr, uint8_t c
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusBlockRead(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataRecv, uint8_t *dataLength)
+smbus_err_t SMBusBlockRead(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataRecv, uint8_t *dataLength)
 {
     if(!handle || !dataRecv || !dataLength)
         return SMBUS_ERR_INVALID_ARG;
@@ -338,7 +338,7 @@ smbus_status_t SMBusBlockRead(smbus_handle_t handle, uint8_t devAddr, uint8_t co
 
 }
 
-smbus_status_t SMBusBlockWriteBlockReadProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataSent,
+smbus_err_t SMBusBlockWriteBlockReadProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataSent,
                                                     uint8_t dataSentLength, uint8_t* dataRecv, uint8_t* dataRecvLength)
 {
     if(!handle || !dataSent  || !dataRecv || !dataRecvLength)
@@ -369,12 +369,12 @@ smbus_status_t SMBusBlockWriteBlockReadProcessCall(smbus_handle_t handle, uint8_
 
 }
 
-smbus_status_t SMBusHostNotify(smbus_handle_t handle, uint8_t hostAddr, uint8_t devAddr, uint16_t data)
+smbus_err_t SMBusHostNotify(smbus_handle_t handle, uint8_t hostAddr, uint8_t devAddr, uint16_t data)
 {
    return SMBusWriteWord(handle, hostAddr, devAddr << 1, data);
 }
 
-smbus_status_t SMBusWrite32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t dataSent)
+smbus_err_t SMBusWrite32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t dataSent)
 {
     TWI_START();
 
@@ -389,7 +389,7 @@ smbus_status_t SMBusWrite32(smbus_handle_t handle, uint8_t devAddr, uint8_t comm
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusRead32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t* dataRecv)
+smbus_err_t SMBusRead32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t* dataRecv)
 {
     if(!handle || !dataRecv)
         return SMBUS_ERR_INVALID_ARG;
@@ -417,7 +417,7 @@ smbus_status_t SMBusRead32(smbus_handle_t handle, uint8_t devAddr, uint8_t comma
 
 }
 
-smbus_status_t SMBusWrite64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t dataSent)
+smbus_err_t SMBusWrite64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t dataSent)
 {
     TWI_START();
     TWI_SEND_ADDR_W_ACK(devAddr);
@@ -431,7 +431,7 @@ smbus_status_t SMBusWrite64(smbus_handle_t handle, uint8_t devAddr, uint8_t comm
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusRead64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t* dataRecv)
+smbus_err_t SMBusRead64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t* dataRecv)
 {
     if(!handle || !dataRecv)
         return SMBUS_ERR_INVALID_ARG;

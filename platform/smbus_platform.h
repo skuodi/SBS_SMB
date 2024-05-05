@@ -36,7 +36,7 @@ typedef enum
     SMBUS_ERR_ADDR_R_TRANSMITTED_NACK_RECIEVED   =  -9,
     SMBUS_ERR_DATA_RECIEVED_ACK_TRANSMITTED      =  -10,
     SMBUS_ERR_DATA_RECIEVED_NACK_TRANSMITTED     =  -11,
-}smbus_status_t;
+}smbus_err_t;
 
 
 typedef struct 
@@ -64,9 +64,9 @@ smbus_handle_t SMBusInit(void* i2cPort, int8_t myAddress, uint32_t i2cSpeed, int
 /**
  * @brief Deinitialize the I2C peripheral attached to the SMBUS \a handle and free allocated resources
  **/
-smbus_status_t SMBusDeinit(smbus_handle_t handle);
+smbus_err_t SMBusDeinit(smbus_handle_t handle);
 
-smbus_status_t SMBusGetInfo(smbus_handle_t handle, smbus_info_t *info);
+smbus_err_t SMBusGetInfo(smbus_handle_t handle, smbus_info_t *info);
 
 /**
  * @brief                       Send the device address along with a read/write bit
@@ -76,7 +76,7 @@ smbus_status_t SMBusGetInfo(smbus_handle_t handle, smbus_info_t *info);
  * @sequence:                   S,ADDRESS,W,a,P
  * 
  **/
-smbus_status_t SMBusQuickCommand(smbus_handle_t handle, uint8_t devAddr, bool readWriteBit);
+smbus_err_t SMBusQuickCommand(smbus_handle_t handle, uint8_t devAddr, bool readWriteBit);
 
 /**
  * @brief                   send 8-bit data
@@ -85,7 +85,7 @@ smbus_status_t SMBusQuickCommand(smbus_handle_t handle, uint8_t devAddr, bool re
  * @sequence:               S,ADDRESS,W,a,DATA BYTE,a,P 
  * 
  **/
-smbus_status_t SMBusSendByte(smbus_handle_t handle, uint8_t devAddr, uint8_t data);
+smbus_err_t SMBusSendByte(smbus_handle_t handle, uint8_t devAddr, uint8_t data);
 
 /**
  * @brief                   receive 8-bit data
@@ -94,7 +94,7 @@ smbus_status_t SMBusSendByte(smbus_handle_t handle, uint8_t devAddr, uint8_t dat
  * @sequence:               S,ADDRESS,R,a,data byte,N,P 
  * 
  **/
-smbus_status_t SMBusReceiveByte(smbus_handle_t handle, uint8_t devAddr, uint8_t* data);
+smbus_err_t SMBusReceiveByte(smbus_handle_t handle, uint8_t devAddr, uint8_t* data);
 
 /**
  * @brief                   send an 8-bit command followed by 8-bit data
@@ -103,7 +103,7 @@ smbus_status_t SMBusReceiveByte(smbus_handle_t handle, uint8_t devAddr, uint8_t*
  * @sequence:               S,ADDRESS+W,a,COMMAND BYTE,a,DATA BYTE,a,P
  * 
  **/
-smbus_status_t SMBusWriteByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t data);
+smbus_err_t SMBusWriteByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t data);
 
 /**
  * @brief                   send an 8-bit command followed by 16-bit data
@@ -112,7 +112,7 @@ smbus_status_t SMBusWriteByte(smbus_handle_t handle, uint8_t devAddr, uint8_t co
  * @sequence:               S,ADDRESS+W,a,COMMAND BYTE,a,DATA LOW BYTE,a,DATA HIGH BYTE,a,P
  * 
  **/
-smbus_status_t SMBusWriteWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t data);
+smbus_err_t SMBusWriteWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t data);
 
 /**
  * @brief                   send an 8-bit command then receive 8-bit data
@@ -121,7 +121,7 @@ smbus_status_t SMBusWriteWord(smbus_handle_t handle, uint8_t devAddr, uint8_t co
  * @sequence:               S,ADDRESS+W,a,COMMAND BYTE,a,Sr,ADDRESS+R,a,data byte,N,P
  * 
  **/
-smbus_status_t SMBusReadByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* data);
+smbus_err_t SMBusReadByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* data);
 
 /**
  * @brief                   send an 8-bit command then receive 16-bit data
@@ -130,7 +130,7 @@ smbus_status_t SMBusReadByte(smbus_handle_t handle, uint8_t devAddr, uint8_t com
  * @sequence:               S,ADDRESS+W,a,COMMAND BYTE,a,Sr,ADDRESS+R,a,data low byte,A,data high byte,N,P
  * 
  **/
-smbus_status_t SMBusReadWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t* data);
+smbus_err_t SMBusReadWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t* data);
 
 /**
  * @brief                   send an 8-bit command followed by 16-bit data then receive 16-bit data
@@ -139,7 +139,7 @@ smbus_status_t SMBusReadWord(smbus_handle_t handle, uint8_t devAddr, uint8_t com
  * @sequence:               S,ADDRESS+W,a,COMMAND,a,DATA LOW BYTE,a,DATA HIGH BYTE,a,Sr,ADDRESS+R,a,data low byte,A,data high byte,N,P
  * 
  **/
-smbus_status_t SMBusProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t dataSent,   uint16_t* dataRecv);
+smbus_err_t SMBusProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t dataSent,   uint16_t* dataRecv);
 
 /**
  * @brief                   send an 8-bit command followed by 8-bit datalength then [datalength] consecutive bytes of data 
@@ -148,7 +148,7 @@ smbus_status_t SMBusProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t 
  * @sequence:               S,ADDRESS+W,a,COMMAND,a,BYTE COUNT = N,a,DATA BYTE 1,a,DATA BYTE 2,a,...,DATA BYTE N,a,P
  * 
  **/
-smbus_status_t SMBusBlockWrite(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataSent, uint8_t dataLength);
+smbus_err_t SMBusBlockWrite(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataSent, uint8_t dataLength);
 
 
 /**
@@ -158,7 +158,7 @@ smbus_status_t SMBusBlockWrite(smbus_handle_t handle, uint8_t devAddr, uint8_t c
  * @sequence:               S,ADDRESS+W,a,COMMAND,a,Sr,ADDRESS+R,a,byte count = n,A,data byte 1,A,data byte 2,A,...,data byte n,N,P
  *
  **/
-smbus_status_t SMBusBlockRead(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataRecv, uint8_t *dataLength);
+smbus_err_t SMBusBlockRead(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataRecv, uint8_t *dataLength);
 
 /**
  * @brief                   send an 8-bit command followed by 8-bit sendlength then [sendlength] consecutive bytes of data
@@ -169,7 +169,7 @@ smbus_status_t SMBusBlockRead(smbus_handle_t handle, uint8_t devAddr, uint8_t co
  *                          Sr,ADDRESS+R,a,byte count = n,A,data byte 1,A,data byte 2,A,...,data byte n,N,P
  * 
  **/
-smbus_status_t SMBusBlockWriteBlockReadProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command,
+smbus_err_t SMBusBlockWriteBlockReadProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command,
                                                     uint8_t* dataSent, uint8_t dataSentLength, uint8_t* dataRecv, uint8_t* dataRecvLength);
 
 /**
@@ -181,7 +181,7 @@ smbus_status_t SMBusBlockWriteBlockReadProcessCall(smbus_handle_t handle, uint8_
  * @sequence:               S,HOST ADDRESS+W,a,DEV ADDRESS,a,DATA LOW BYTE,a,DATA HIGH BYTE,a,P
  * 
  **/
-smbus_status_t SMBusHostNotify(smbus_handle_t handle, uint8_t hostAddr, uint8_t devAddr, uint16_t data);
+smbus_err_t SMBusHostNotify(smbus_handle_t handle, uint8_t hostAddr, uint8_t devAddr, uint16_t data);
 
 /**
  * @brief                   send an 8-bit command followed by 32-bit data 
@@ -190,7 +190,7 @@ smbus_status_t SMBusHostNotify(smbus_handle_t handle, uint8_t hostAddr, uint8_t 
  * @sequence:               S,ADDRESS+W,a,COMMAND,a,DATA BYTE[7:0],a,DATA BYTE[15:8],a,DATA BYTE[23:16],a,DATA BYTE[31:24],a,P
  * 
  **/
-smbus_status_t SMBusWrite32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t dataSent);
+smbus_err_t SMBusWrite32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t dataSent);
 
 /**
  * @brief                   send an 8-bit command then receive 32-bit data
@@ -199,7 +199,7 @@ smbus_status_t SMBusWrite32(smbus_handle_t handle, uint8_t devAddr, uint8_t comm
  * @sequence:               S,ADDRESS+W,a,COMMAND,a,Sr,ADDRESS+R,a,data byte[7:0],A,data byte[15:8],A,data byte[23:16],A,data byte[31:24],N,P
  *
  **/
-smbus_status_t SMBusRead32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t *dataRecv);
+smbus_err_t SMBusRead32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t *dataRecv);
 
 /**
  * @brief                   send an 8-bit command followed by 64-bit data
@@ -209,7 +209,7 @@ smbus_status_t SMBusRead32(smbus_handle_t handle, uint8_t devAddr, uint8_t comma
  *                                                  DATA BYTE[39:32],a,DATA BYTE[47:40],a,DATA BYTE[55:48],a,DATA BYTE[63:56],a,P
  *
  **/
-smbus_status_t SMBusWrite64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t dataSent);
+smbus_err_t SMBusWrite64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t dataSent);
 
 /**
  * @brief                   send an 8-bit command then receive 64-bit data
@@ -219,7 +219,7 @@ smbus_status_t SMBusWrite64(smbus_handle_t handle, uint8_t devAddr, uint8_t comm
  *                                                              data byte[39:32],A,data byte[47:40],A,data byte[55:48],A,data byte[63:56],N,P
  *
  * */
-smbus_status_t SMBusRead64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t *dataRecv);
+smbus_err_t SMBusRead64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t *dataRecv);
 
 /**
  * @brief                   send an 8-bit command then receive 16-bit data using BlockWrite() protocol
@@ -228,7 +228,7 @@ smbus_status_t SMBusRead64(smbus_handle_t handle, uint8_t devAddr, uint8_t comma
  * @sequence:               S,ADDRESS+W,a,COMMAND,a,Sr,ADDRESS+R,a,data byte[7:0],A,data byte[15:8],N,P
  *
  **/
-smbus_status_t SMBusWrite16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t dataSent);
+smbus_err_t SMBusWrite16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t dataSent);
 
 /**
  * @brief                   send an 8-bit command then receive 16-bit data using ReadBlock() protocol
@@ -237,7 +237,7 @@ smbus_status_t SMBusWrite16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t
  * @sequence:               S,ADDRESS+W,a,COMMAND,a,Sr,ADDRESS+R,a,data byte[7:0],A,data byte[15:8],N,P
  *
  **/
-smbus_status_t SMBusRead16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t *dataRecv);
+smbus_err_t SMBusRead16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t *dataRecv);
 
 /**
  * @brief                   send an 8-bit command then receive 32-bit data using BlockWrite() protocol
@@ -246,7 +246,7 @@ smbus_status_t SMBusRead16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t 
  * @sequence:               S,ADDRESS+W,a,COMMAND,a,Sr,ADDRESS+R,a,data byte[7:0],A,data byte[15:8],A,data byte[23:16],A,data byte[31:24],N,P
  *
  **/
-smbus_status_t SMBusWrite32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t dataSent);
+smbus_err_t SMBusWrite32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t dataSent);
 
 /**
  * @brief                   send an 8-bit command then receive 32-bit data using ReadBlock() protocol
@@ -255,7 +255,7 @@ smbus_status_t SMBusWrite32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t
  * @sequence:               S,ADDRESS+W,a,COMMAND,a,Sr,ADDRESS+R,a,data byte[7:0],A,data byte[15:8],A,data byte[23:16],A,data byte[31:24],N,P
  *
  **/
-smbus_status_t SMBusRead32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t *dataRecv);
+smbus_err_t SMBusRead32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t *dataRecv);
 
 /**
  * @brief                   send an 8-bit command followed by 64-bit data using WriteBlock() protocol
@@ -265,7 +265,7 @@ smbus_status_t SMBusRead32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t 
  *                                                  DATA BYTE[39:32],a,DATA BYTE[47:40],a,DATA BYTE[55:48],a,DATA BYTE[63:56],a,P
  *
  **/
-smbus_status_t SMBusWrite64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t dataSent);
+smbus_err_t SMBusWrite64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t dataSent);
 
 /**
  * @brief                   send an 8-bit command then receive 64-bit data using ReadBlock() protocol
@@ -275,7 +275,7 @@ smbus_status_t SMBusWrite64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t
  *                                                              data byte[39:32],A,data byte[47:40],A,data byte[55:48],A,data byte[63:56],N,P
  *
  * */
-smbus_status_t SMBusRead64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t *dataRecv);
+smbus_err_t SMBusRead64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t *dataRecv);
 
 /**
  * @brief                   send [datalength] consecutive bytes of data using standard I2C
@@ -284,7 +284,7 @@ smbus_status_t SMBusRead64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t 
  * @sequence:               S,ADDRESS+W,a,DATA BYTE 1,a,DATA BYTE 2,a,...,DATA BYTE N,a,P
  *
  **/
-smbus_status_t SMBusWriteRaw(smbus_handle_t handle, uint8_t devAddr, uint8_t *dataSent, uint8_t dataLength);
+smbus_err_t SMBusWriteRaw(smbus_handle_t handle, uint8_t devAddr, uint8_t *dataSent, uint8_t dataLength);
 
 /**
  * @brief                   send an 8-bit command followed by an 16-bit word then receive a chunk of data using ReadBlock() protocol
@@ -294,7 +294,7 @@ smbus_status_t SMBusWriteRaw(smbus_handle_t handle, uint8_t devAddr, uint8_t *da
  * @param   delayMs         Millosecond delay between the WriteWord() and the ReadBlock()
  *
  * */
-smbus_status_t SMBusWriteWordReadBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word, bool wordFlipEndianness,
+smbus_err_t SMBusWriteWordReadBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word, bool wordFlipEndianness,
                                        uint8_t responseCommand, uint8_t *dataRecv, uint8_t *dataLength, int delayMs);
 
 /**
@@ -305,7 +305,7 @@ smbus_status_t SMBusWriteWordReadBlock(smbus_handle_t handle, uint8_t devAddr, u
  * @param   dataLength      Number of bytes to be sent with WriteBlock()
  * @param   delayMs         Millosecond delay between the WriteWord() and the WriteBlock()
  * */
-smbus_status_t SMBusWriteWordWriteBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word, bool wordFlipEndianness,
+smbus_err_t SMBusWriteWordWriteBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word, bool wordFlipEndianness,
                                        uint8_t responseCommand, uint8_t *dataSent, uint8_t dataLength, int delayMs);
 
 /**
@@ -315,7 +315,7 @@ smbus_status_t SMBusWriteWordWriteBlock(smbus_handle_t handle, uint8_t devAddr, 
  * @param   dataLength      If the function was successfull, contains the number of bytes received with ReadBlock()
  * @param   delayMs         Millosecond delay between the WriteWordBlock() and the ReadBlock()
  * */
-smbus_status_t SMBusWriteWordBlockReadBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word,
+smbus_err_t SMBusWriteWordBlockReadBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word,
                                             uint8_t responseCommand, uint8_t *dataRecv, uint8_t *dataLength, int delayMs);
 
 void SMBusPlatformDelayMs(uint32_t delayMs);

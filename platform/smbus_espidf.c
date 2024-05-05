@@ -85,7 +85,7 @@ smbus_handle_t SMBusInit(void* i2cPort, int8_t myAddress, uint32_t i2cSpeed, int
     return busHandle;
 }
 
-smbus_status_t SMBusDeinit(smbus_handle_t handle)
+smbus_err_t SMBusDeinit(smbus_handle_t handle)
 {
     if(!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -97,7 +97,7 @@ smbus_status_t SMBusDeinit(smbus_handle_t handle)
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusGetInfo(smbus_handle_t handle, smbus_info_t *info)
+smbus_err_t SMBusGetInfo(smbus_handle_t handle, smbus_info_t *info)
 {
     if(!handle || !info)
         return SMBUS_ERR_INVALID_ARG;
@@ -112,7 +112,7 @@ smbus_status_t SMBusGetInfo(smbus_handle_t handle, smbus_info_t *info)
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusQuickCommand(smbus_handle_t handle, uint8_t devAddr, bool readWriteBit)
+smbus_err_t SMBusQuickCommand(smbus_handle_t handle, uint8_t devAddr, bool readWriteBit)
 {
     if (!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -127,7 +127,7 @@ smbus_status_t SMBusQuickCommand(smbus_handle_t handle, uint8_t devAddr, bool re
     return (ret == ESP_OK) ? SMBUS_ERR_OK : (ret == ESP_ERR_TIMEOUT) ? SMBUS_ERR_TIMEOUT : SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusSendByte(smbus_handle_t handle, uint8_t devAddr, uint8_t data)
+smbus_err_t SMBusSendByte(smbus_handle_t handle, uint8_t devAddr, uint8_t data)
 {
     if (!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -141,7 +141,7 @@ smbus_status_t SMBusSendByte(smbus_handle_t handle, uint8_t devAddr, uint8_t dat
     return (ret == ESP_OK) ? SMBUS_ERR_OK : (ret == ESP_ERR_TIMEOUT) ? SMBUS_ERR_TIMEOUT : SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusReceiveByte(smbus_handle_t handle, uint8_t devAddr, uint8_t* data)
+smbus_err_t SMBusReceiveByte(smbus_handle_t handle, uint8_t devAddr, uint8_t* data)
 {
     if (!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -167,7 +167,7 @@ smbus_status_t SMBusReceiveByte(smbus_handle_t handle, uint8_t devAddr, uint8_t*
     return SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusWriteByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t data)
+smbus_err_t SMBusWriteByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t data)
 {
     if (!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -181,7 +181,7 @@ smbus_status_t SMBusWriteByte(smbus_handle_t handle, uint8_t devAddr, uint8_t co
     return (ret == ESP_OK) ? SMBUS_ERR_OK : (ret == ESP_ERR_TIMEOUT) ? SMBUS_ERR_TIMEOUT : SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusWriteWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t data)
+smbus_err_t SMBusWriteWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t data)
 {
     if (!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -195,7 +195,7 @@ smbus_status_t SMBusWriteWord(smbus_handle_t handle, uint8_t devAddr, uint8_t co
     return (ret == ESP_OK) ? SMBUS_ERR_OK : (ret == ESP_ERR_TIMEOUT) ? SMBUS_ERR_TIMEOUT : SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusReadByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* data)
+smbus_err_t SMBusReadByte(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* data)
 {
     if (!handle || !data)
         return SMBUS_ERR_INVALID_ARG;
@@ -222,7 +222,7 @@ smbus_status_t SMBusReadByte(smbus_handle_t handle, uint8_t devAddr, uint8_t com
     return SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusReadWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t* data)
+smbus_err_t SMBusReadWord(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t* data)
 {
     if(!handle || !data)
         return SMBUS_ERR_INVALID_ARG;
@@ -249,7 +249,7 @@ smbus_status_t SMBusReadWord(smbus_handle_t handle, uint8_t devAddr, uint8_t com
     return SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t dataSent, uint16_t* dataRecv)
+smbus_err_t SMBusProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t dataSent, uint16_t* dataRecv)
 {
     if(!handle || !dataRecv)
         return SMBUS_ERR_INVALID_ARG;
@@ -276,7 +276,7 @@ smbus_status_t SMBusProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t 
     return SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusBlockWrite(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataSent, uint8_t dataLength)
+smbus_err_t SMBusBlockWrite(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataSent, uint8_t dataLength)
 {
     if(!handle || !dataSent || !dataLength)
         return SMBUS_ERR_INVALID_ARG;
@@ -294,7 +294,7 @@ smbus_status_t SMBusBlockWrite(smbus_handle_t handle, uint8_t devAddr, uint8_t c
     return (ret == ESP_OK) ? SMBUS_ERR_OK : (ret == ESP_ERR_TIMEOUT) ? SMBUS_ERR_TIMEOUT : SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusBlockRead(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataRecv, uint8_t *dataLength)
+smbus_err_t SMBusBlockRead(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataRecv, uint8_t *dataLength)
 {   
     if(!handle || !dataRecv || !dataLength)
         return SMBUS_ERR_INVALID_ARG;
@@ -341,7 +341,7 @@ smbus_status_t SMBusBlockRead(smbus_handle_t handle, uint8_t devAddr, uint8_t co
     return SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusBlockWriteBlockReadProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataSent,
+smbus_err_t SMBusBlockWriteBlockReadProcessCall(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint8_t* dataSent,
                                                     uint8_t dataSentLength, uint8_t* dataRecv, uint8_t* dataRecvLength)
 {   
     if(!handle || !dataSent || !dataSentLength || !dataRecv || !dataRecvLength)
@@ -396,7 +396,7 @@ smbus_status_t SMBusBlockWriteBlockReadProcessCall(smbus_handle_t handle, uint8_
     return SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusHostNotify(smbus_handle_t handle, uint8_t hostAddr, uint8_t devAddr, uint16_t data)
+smbus_err_t SMBusHostNotify(smbus_handle_t handle, uint8_t hostAddr, uint8_t devAddr, uint16_t data)
 {
     if (!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -406,7 +406,7 @@ smbus_status_t SMBusHostNotify(smbus_handle_t handle, uint8_t hostAddr, uint8_t 
     return (ret == ESP_OK) ? SMBUS_ERR_OK : (ret == ESP_ERR_TIMEOUT) ? SMBUS_ERR_TIMEOUT : SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusWrite32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t dataSent)
+smbus_err_t SMBusWrite32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t dataSent)
 {
     if(!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -428,7 +428,7 @@ smbus_status_t SMBusWrite32(smbus_handle_t handle, uint8_t devAddr, uint8_t comm
     return (ret == ESP_OK) ? SMBUS_ERR_OK : (ret == ESP_ERR_TIMEOUT) ? SMBUS_ERR_TIMEOUT : SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusRead32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t* dataRecv)
+smbus_err_t SMBusRead32(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t* dataRecv)
 {
     if(!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -458,7 +458,7 @@ smbus_status_t SMBusRead32(smbus_handle_t handle, uint8_t devAddr, uint8_t comma
     return SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusWrite64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t dataSent)
+smbus_err_t SMBusWrite64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t dataSent)
 {
     if(!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -484,7 +484,7 @@ smbus_status_t SMBusWrite64(smbus_handle_t handle, uint8_t devAddr, uint8_t comm
     return (ret == ESP_OK) ? SMBUS_ERR_OK : (ret == ESP_ERR_TIMEOUT) ? SMBUS_ERR_TIMEOUT : SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusRead64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t* dataRecv)
+smbus_err_t SMBusRead64(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t* dataRecv)
 {
     if(!handle)
         return SMBUS_ERR_INVALID_ARG;
@@ -523,7 +523,7 @@ smbus_status_t SMBusRead64(smbus_handle_t handle, uint8_t devAddr, uint8_t comma
     return SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusWrite32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t dataSent)
+smbus_err_t SMBusWrite32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t dataSent)
 {
     uint8_t buff[] = {(dataSent >> 0) & 0xFF,
                       (dataSent >> 8) & 0xFF,
@@ -533,11 +533,11 @@ smbus_status_t SMBusWrite32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t
     return SMBusBlockWrite(handle, devAddr, command, buff, sizeof(uint32_t));
 }
 
-smbus_status_t SMBusRead16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t *dataRecv)
+smbus_err_t SMBusRead16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t *dataRecv)
 {
     uint8_t dataBuff[256];
     uint8_t recvLen;
-    smbus_status_t ret = SMBusBlockRead(handle, devAddr, command, dataBuff, &recvLen);
+    smbus_err_t ret = SMBusBlockRead(handle, devAddr, command, dataBuff, &recvLen);
 
     if (ret != SMBUS_ERR_OK || recvLen != sizeof(uint16_t))
         return ret;
@@ -548,7 +548,7 @@ smbus_status_t SMBusRead16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t 
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusWrite16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t dataSent)
+smbus_err_t SMBusWrite16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t dataSent)
 {
     uint8_t dataBuff[] = {(dataSent >> 0) & 0xFF,
                           (dataSent >> 8) & 0xFF};
@@ -556,11 +556,11 @@ smbus_status_t SMBusWrite16Block(smbus_handle_t handle, uint8_t devAddr, uint8_t
     return SMBusBlockWrite(handle, devAddr, command, dataBuff, sizeof(uint16_t));
 }
 
-smbus_status_t SMBusRead32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t *dataRecv)
+smbus_err_t SMBusRead32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint32_t *dataRecv)
 {
     uint8_t dataBuff[256];
     uint8_t recvLen;
-    smbus_status_t ret = SMBusBlockRead(handle, devAddr, command, dataBuff, &recvLen);
+    smbus_err_t ret = SMBusBlockRead(handle, devAddr, command, dataBuff, &recvLen);
 
     if (ret != SMBUS_ERR_OK || recvLen != sizeof(uint32_t))
         return ret;
@@ -573,7 +573,7 @@ smbus_status_t SMBusRead32Block(smbus_handle_t handle, uint8_t devAddr, uint8_t 
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusWrite64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t dataSent)
+smbus_err_t SMBusWrite64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t dataSent)
 {
     uint8_t dataBuff[] = {(dataSent >> 0) & 0xFF,
                       (dataSent >> 8) & 0xFF,
@@ -587,11 +587,11 @@ smbus_status_t SMBusWrite64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t
     return SMBusBlockWrite(handle, devAddr, command, dataBuff, sizeof(uint64_t));
 }
 
-smbus_status_t SMBusRead64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t *dataRecv)
+smbus_err_t SMBusRead64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint64_t *dataRecv)
 {
     uint8_t dataBuff[256];
     uint8_t recvLen;
-    smbus_status_t ret = SMBusBlockRead(handle, devAddr, command, dataBuff, &recvLen);
+    smbus_err_t ret = SMBusBlockRead(handle, devAddr, command, dataBuff, &recvLen);
 
     if (ret != SMBUS_ERR_OK || recvLen != sizeof(uint64_t))
         return ret;
@@ -608,7 +608,7 @@ smbus_status_t SMBusRead64Block(smbus_handle_t handle, uint8_t devAddr, uint8_t 
     return SMBUS_ERR_OK;
 }
 
-smbus_status_t SMBusWriteRaw(smbus_handle_t handle, uint8_t devAddr, uint8_t *dataSent, uint8_t dataLength)
+smbus_err_t SMBusWriteRaw(smbus_handle_t handle, uint8_t devAddr, uint8_t *dataSent, uint8_t dataLength)
 {
 
     int ret = i2c_master_write_to_device(handle->i2cPort, devAddr, dataSent, dataLength, pdMS_TO_TICKS(handle->info.timeoutMs));
@@ -617,13 +617,13 @@ smbus_status_t SMBusWriteRaw(smbus_handle_t handle, uint8_t devAddr, uint8_t *da
                                                                      : SMBUS_ERR_FAIL;
 }
 
-smbus_status_t SMBusWriteWordReadBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word, bool wordFlipEndianness,
+smbus_err_t SMBusWriteWordReadBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word, bool wordFlipEndianness,
                                        uint8_t responseCommand, uint8_t *dataRecv, uint8_t *dataLength, int delayMs)
 {
     if(wordFlipEndianness)
         word = (word << 8) | (word >> 8);
 
-    smbus_status_t ret = SMBusWriteWord(handle, devAddr, command, word);
+    smbus_err_t ret = SMBusWriteWord(handle, devAddr, command, word);
     if (ret != SMBUS_ERR_OK)
         return ret;
     //If the delay is greater than the RTOS defalt tick resolution
@@ -633,13 +633,13 @@ smbus_status_t SMBusWriteWordReadBlock(smbus_handle_t handle, uint8_t devAddr, u
     return SMBusBlockRead(handle, devAddr, responseCommand, dataRecv, dataLength);
 }
 
-smbus_status_t SMBusWriteWordWriteBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word, bool wordFlipEndianness,
+smbus_err_t SMBusWriteWordWriteBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word, bool wordFlipEndianness,
                                         uint8_t responseCommand, uint8_t *dataSent, uint8_t dataLength, int delayMs)
 {
     if (wordFlipEndianness)
         word = (word << 8) | (word >> 8);
 
-    smbus_status_t ret = SMBusWriteWord(handle, devAddr, command, word);
+    smbus_err_t ret = SMBusWriteWord(handle, devAddr, command, word);
     if (ret != SMBUS_ERR_OK)
         return ret;
     //If the delay is greater than the RTOS defalt tick resolution
@@ -649,10 +649,10 @@ smbus_status_t SMBusWriteWordWriteBlock(smbus_handle_t handle, uint8_t devAddr, 
     return SMBusBlockWrite(handle, devAddr, responseCommand, dataSent, dataLength);
 }
 
-smbus_status_t SMBusWriteWordBlockReadBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word,
+smbus_err_t SMBusWriteWordBlockReadBlock(smbus_handle_t handle, uint8_t devAddr, uint8_t command, uint16_t word,
                                             uint8_t responseCommand, uint8_t *dataRecv, uint8_t *dataLength, int delayMs)
 {
-    smbus_status_t ret = SMBusWrite16Block(handle, devAddr, command, word);
+    smbus_err_t ret = SMBusWrite16Block(handle, devAddr, command, word);
     if (ret != SMBUS_ERR_OK)
         return ret;
     //If the delay is greater than the RTOS defalt tick resolution
